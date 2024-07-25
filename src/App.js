@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import NewWheel from './NewWheel';
+import { createRoot } from 'react-dom/client';
 
-function App() {
+const RewardWidget = ({ settings }) => {
+  const [rewards, setRewards] = useState(settings.rewardOptions || []);
+
+  useEffect(() => {
+    setRewards(settings.rewardOptions || []);
+  }, [settings]);
+
+  if (!settings || !settings.rewardOptions) {
+    return <div>Error: Invalid settings</div>;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>{settings.nameOfReward}</h1>
+      <NewWheel rewardList={rewards} />
     </div>
   );
-}
+};
 
-export default App;
+export default RewardWidget;
+
+window.renderRewardWidget = (settings, containerId) => {
+  console.log('renderRewardWidget called', settings, containerId);
+  const container = document.getElementById('root');
+  if (container) {
+    const root = createRoot(container);
+    root.render(<RewardWidget settings={settings} />);
+  } else {
+    console.error('Container not found');
+  }
+};

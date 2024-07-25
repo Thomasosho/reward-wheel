@@ -1,17 +1,36 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import RewardWidget from './App';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const initializeWidget = () => {
+  const defaultSettings = {
+    nameOfReward: 'Default Reward Name',
+    rewardOptions: [
+      { id: 1, description: 'Default Reward 1' },
+      { id: 2, description: 'Default Reward 2' }
+    ]
+  };
+  const defaultContainerId = 'default-container';
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+  // Use settings from the window object if available
+  const settings = window.rewardWidgetSettings || defaultSettings;
+  const containerId = window.rewardWidgetContainerId || defaultContainerId;
+
+  console.log('Settings:', settings);
+  console.log('Container ID:', containerId);
+
+  const container = document.getElementById(containerId);
+
+  if (container) {
+    const widgetRoot = createRoot(container);
+    widgetRoot.render(<RewardWidget settings={settings} />);
+  } else {
+    console.error('Container not found');
+  }
+};
+
+// Initialize on script load
+document.addEventListener('DOMContentLoaded', initializeWidget);
 reportWebVitals();
