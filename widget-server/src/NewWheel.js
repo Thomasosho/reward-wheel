@@ -1,17 +1,62 @@
+import React, { useImperativeHandle, forwardRef, useState, useEffect } from 'react';
+
 const colors = ["white", "#ffe368", "#f13a23"];
 
-const NewWheel = ({
-  rewardList = [
-    { description: "Prize 1" },
-    { description: "Prize 2" },
-    { description: "Prize 3" },
-    { description: "Prize 4" },
-    { description: "Prize 5" },
-    { description: "Prize 6" },
-    { description: "Prize 7" },
-    { description: "Prize 8" },
-  ],
-}) => {
+const NewWheel = forwardRef(({ rewardList = [
+  { description: "Prize 1" },
+  { description: "Prize 2" },
+  { description: "Prize 3" },
+  { description: "Prize 4" },
+  { description: "Prize 5" },
+  { description: "Prize 6" },
+  { description: "Prize 7" },
+  { description: "Prize 8" },
+], onSelectReward, pointer }, ref) => {
+  const [rotation, setRotation] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
+
+  console.info(pointer);
+
+  useImperativeHandle(ref, () => ({
+    spinWheel: () => {
+      setIsSpinning(true);
+      const numSegments = rewardList.length;
+      const segmentAngle = 360 / numSegments;
+      const randomSegment = Math.floor(Math.random() * numSegments);
+      const baseAngle = randomSegment * segmentAngle;
+      const randomOffset = Math.random() * segmentAngle;
+      const targetAngle = baseAngle + randomOffset;
+      const fullRotations = 5;
+
+      const totalRotation = fullRotations * 360 + targetAngle;
+
+      setRotation(prevRotation => prevRotation + totalRotation);
+
+      // Set a timeout to stop spinning after the animation duration
+      setTimeout(() => {
+        setIsSpinning(false);
+      }, 4000); // 4000ms matches the CSS transition duration
+    }
+  }));
+
+  useEffect(() => {
+    if (rotation === 0 || isSpinning) return;
+
+    // Calculate total rotation within a 360-degree range
+    const totalRotation = rotation % 360;
+    const numSegments = rewardList.length;
+    const segmentAngle = 360 / numSegments;
+
+    // Calculate the index of the selected segment
+    // We subtract from 360 because the wheel rotates clockwise
+    const selectedIndex = Math.floor(((360 - totalRotation) % 360) / segmentAngle);
+
+    // Select the reward
+    const selectedReward = rewardList[selectedIndex];
+    onSelectReward(selectedReward);
+
+  }, [rotation, rewardList, onSelectReward, isSpinning]);
+
   const wrapText = (text, maxLength) => {
     const words = text.split(" ");
     const lines = [];
@@ -34,7 +79,7 @@ const NewWheel = ({
     <svg
       viewBox="0 0 600 600"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ width: "250px", height: "250px", margin: "auto" }}
+      style={{ width: "350px", height: "350px", margin: "auto" }}
     >
       <defs>
         <linearGradient
@@ -108,73 +153,91 @@ const NewWheel = ({
         />
       </g>
 
-      {/* Reward Wheel Itself */}
-      <g transform="translate(300,300)">
-        {rewardList.map((item, index) => {
-          const startAngle = (360 / rewardList.length) * index;
-          const endAngle = (360 / rewardList.length) * (index + 1);
-          const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
-          const x1 = 250 * Math.cos((Math.PI / 180) * startAngle);
-          const y1 = 250 * Math.sin((Math.PI / 180) * startAngle);
-          const x2 = 250 * Math.cos((Math.PI / 180) * endAngle);
-          const y2 = 250 * Math.sin((Math.PI / 180) * endAngle);
+      {/* Rotating Group */}
+      <g
+        style={{
+          transformOrigin: 'center',
+          transform: `rotate(${rotation}deg)`,
+          transition: 'transform 4s cubic-bezier(0.33, 1, 0.68, 1)'
+        }}
+      >
+        {/* Reward Wheel Itself */}
+        <g transform="translate(300,300)">
+          {rewardList.map((item, index) => {
+            const startAngle = (360 / rewardList.length) * index;
+            const endAngle = (360 / rewardList.length) * (index + 1);
+            const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+            const x1 = 250 * Math.cos((Math.PI / 180) * startAngle);
+            const y1 = 250 * Math.sin((Math.PI / 180) * startAngle);
+            const x2 = 250 * Math.cos((Math.PI / 180) * endAngle);
+            const y2 = 250 * Math.sin((Math.PI / 180) * endAngle);
 
-          return (
-            <path
-              key={index}
-              d={`M0,0 L${x1},${y1} A250,250 0 ${largeArcFlag},1 ${x2},${y2} Z`}
-              fill={colors[index % colors.length]}
-              stroke="black"
-              strokeWidth="2"
-            />
-          );
-        })}
+            return (
+              <path
+                key={index}
+                d={`M0,0 L${x1},${y1} A250,250 0 ${largeArcFlag},1 ${x2},${y2} Z`}
+                fill={colors[index % colors.length]}
+                stroke="black"
+                strokeWidth="2"
+              />
+            );
+          })}
+        </g>
+
+        <g transform="translate(300,300)">
+          {rewardList.map((item, index) => {
+            const angle =
+              (360 / rewardList.length) * index + 360 / rewardList.length / 2;
+            const radius = 180;
+            const x = radius * Math.cos((Math.PI / 180) * angle);
+            const y = radius * Math.sin((Math.PI / 180) * angle);
+            const rotateAngle = angle + 90;
+            const lines = wrapText(item.description, 10);
+
+            return (
+              <g key={index} transform={`rotate(${rotateAngle} ${x} ${y})`}>
+                {lines.map((line, lineIndex) => (
+                  <text
+                    key={lineIndex}
+                    x={x}
+                    y={y + lineIndex * 30}
+                    textAnchor="middle"
+                    alignmentBaseline="middle"
+                    style={{
+                      fontSize: "25px",
+                      fill: "black",
+                      fontWeight: "bold",
+                      textAnchor: "middle",
+                    }}
+                  >
+                    {line}
+                  </text>
+                ))}
+              </g>
+            );
+          })}
+        </g>
       </g>
 
-      <g transform="translate(300,300)">
-        {rewardList.map((item, index) => {
-          const angle =
-            (360 / rewardList.length) * index + 360 / rewardList.length / 2;
-          const radius = 180;
-          const x = radius * Math.cos((Math.PI / 180) * angle);
-          const y = radius * Math.sin((Math.PI / 180) * angle);
-          const rotateAngle = angle + 90;
-          const lines = wrapText(item.description, 10);
-
-          return (
-            <g key={index} transform={`rotate(${rotateAngle} ${x} ${y})`}>
-              {lines.map((line, lineIndex) => (
-                <text
-                  key={lineIndex}
-                  x={x}
-                  y={y + lineIndex * 30}
-                  textAnchor="middle"
-                  alignmentBaseline="middle"
-                  style={{
-                    fontSize: "25px",
-                    fill: "black",
-                    fontWeight: "bold",
-                    textAnchor: "middle",
-                  }}
-                >
-                  {line}
-                </text>
-              ))}
-            </g>
-          );
-        })}
-      </g>
-
-      {/* Pointer Pin */}
-      <polygon
+      {/* Fixed Pointer */}
+      {/* <polygon
         points="300,50 280,100 320,100"
         fill="black"
         stroke="black"
         strokeWidth="2"
-        transform="translate(0,200) rotate(0)"
+        transform="translate(0,200)"
+      /> */}
+      {/* Fixed Pointer */}
+      <image
+        href={pointer}
+        x="250"
+        y="230"
+        width="100"
+        preserveAspectRatio="xMidYMid meet"
+        transform="rotate(55, 300, 300)"
       />
     </svg>
   );
-};
+});
 
 export default NewWheel;

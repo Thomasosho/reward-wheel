@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'widget-server')));
 const url = `http://localhost:${port}`;
 
 app.get('/widget', (req, res) => {
-  const { formState = {}, rewardId = '' } = req.query;
+  const { formState = {}, rewardId = '', imageSrc = '', poweredBy = '', pointer = '' } = req.query;
 
   let parsedFormState;
   try {
@@ -40,6 +40,9 @@ app.get('/widget', (req, res) => {
       {
         nameOfReward: '${parsedFormState.nameOfReward}',
         rewardOptions: ${JSON.stringify(parsedFormState.rewardOptions)},
+        image: '${imageSrc}',
+        poweredBy: '${poweredBy}',
+        pointer: '${pointer}',
       }, 
       'reward-widget'
     );
