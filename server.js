@@ -4,15 +4,44 @@ const app = express();
 const cors = require('cors');
 const port = 8080;
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 
 app.use(express.static(path.join(__dirname, 'widget-server')));
 
 const url = `http://localhost:${port}`;
 
 app.get('/widget', (req, res) => {
-  const { formState = {}, rewardId = '', imageSrc = '', poweredBy = '', pointer = '' } = req.query;
 
+  // const { formState = {}, rewardId = '', imageSrc = '', poweredBy = '', pointer = '' } = req.query;
+  const {
+    formState = '{}',
+    rewardId = '',
+    imageSrc = '',
+    poweredBy = '',
+    pointer = '',
+    primaryColor = '',
+    secondaryColor = '',
+    textColor = '',
+    selectedFont = '',
+    isOnPageLoad = 'false',
+    isOnExit = 'false',
+    isOnClickTrigger = 'false',
+    seconds = '0',
+    days = '0',
+    winTitle = '',
+    winDescription = '',
+    winPrimaryButton = '',
+    winSecondaryButton = '',
+    loseTitle = '',
+    loseDescription = '',
+    losePrimaryButton = '',
+    loseSecondaryButton = '',
+    isModalOpen = ''
+  } = req.query;
+
+  console.log('Received request with query params:', formState);
   let parsedFormState;
   try {
     parsedFormState = JSON.parse(formState);
@@ -43,6 +72,24 @@ app.get('/widget', (req, res) => {
         image: '${imageSrc}',
         poweredBy: '${poweredBy}',
         pointer: '${pointer}',
+        primaryColor: '${primaryColor}',
+        secondaryColor: '${secondaryColor}',
+        textColor: '${textColor}',
+        selectedFont: '${selectedFont}',
+        isOnPageLoad: '${isOnPageLoad}',
+        isOnExit: '${isOnExit}',
+        isOnClickTrigger: '${isOnClickTrigger}',
+        seconds: '${seconds}',
+        days: '${days}',
+        winTitle: '${winTitle}',
+        winDescription: '${winDescription}',
+        winPrimaryButton: '${winPrimaryButton}',
+        winSecondaryButton: '${winSecondaryButton}',
+        loseTitle: '${loseTitle}',
+        loseDescription: '${loseDescription}',
+        losePrimaryButton: '${losePrimaryButton}',
+        loseSecondaryButton: '${loseSecondaryButton}',
+        isOpen: '${isModalOpen}',
       }, 
       'reward-widget'
     );
