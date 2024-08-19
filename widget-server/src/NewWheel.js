@@ -1,7 +1,5 @@
 import React, { useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 
-const colors = ["white", "#ffe368", "#f13a23"];
-
 const NewWheel = forwardRef(({ rewardList = [
   { description: "Prize 1" },
   { description: "Prize 2" },
@@ -11,9 +9,14 @@ const NewWheel = forwardRef(({ rewardList = [
   { description: "Prize 6" },
   { description: "Prize 7" },
   { description: "Prize 8" },
-], onSelectReward, pointer }, ref) => {
+], onSelectReward, pointer, primaryColor,
+  secondaryColor,
+  textColor,
+  selectedFont, }, ref) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
+
+  const colors = [primaryColor, secondaryColor, '#f13a23'];
 
   console.info(pointer);
 
@@ -90,8 +93,8 @@ const NewWheel = forwardRef(({ rewardList = [
           y2="180.44"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0" stopColor="#993c0b" />
-          <stop offset=".85" stopColor="#ffe368" />
+          <stop offset="0" stopColor={primaryColor} />
+          <stop offset=".85" stopColor={secondaryColor} />
           <stop offset="1" stopColor="#f8c448" />
         </linearGradient>
 
@@ -205,7 +208,7 @@ const NewWheel = forwardRef(({ rewardList = [
                     alignmentBaseline="middle"
                     style={{
                       fontSize: "25px",
-                      fill: "black",
+                      fill: textColor,
                       fontWeight: "bold",
                       textAnchor: "middle",
                     }}

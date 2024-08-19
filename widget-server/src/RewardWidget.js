@@ -351,7 +351,6 @@ const RewardWidget = ({ settings }) => {
             secondaryColor={settings.secondaryColor}
             textColor={settings.textColor}
             selectedFont={settings.selectedFont}
-            isOnClickTrigger={settings.isOnClickTrigger}
           />
           <SpinButton onClick={handleSpinClick} disabled={isSpinning}>
             {isSpinning ? 'Spinning...' : 'Spin Now'}
