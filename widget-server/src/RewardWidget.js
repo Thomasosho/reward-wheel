@@ -273,7 +273,7 @@ const RewardWidget = ({ settings }) => {
       wheelRef.current.spinWheel();
     }
     try {
-      const response = await fetch(`https://api.rewardclan.com/api/v1/customer/spin/${settings.rewardId}`, {
+      const response = await fetch(`https://api.rewardclan.com/api/v1/widget/spin/${settings.rewardId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
