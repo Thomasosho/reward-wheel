@@ -1,4 +1,5 @@
 const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
 const app = express();
 const cors = require('cors');
@@ -11,8 +12,6 @@ app.use(express.static(path.join(__dirname, 'widget-server')));
 const url = `http://localhost:${port}`;
 
 app.get('/widget', (req, res) => {
-
-  // const { formState = {}, rewardId = '', imageSrc = '', poweredBy = '', pointer = '' } = req.query;
   const {
     formState = '{}',
     rewardId = '',
@@ -48,6 +47,8 @@ app.get('/widget', (req, res) => {
   }
 
   console.log('formState', formState)
+
+  console.log('rewardId', rewardId)
 
   res.send(`
 <!DOCTYPE html>
@@ -88,6 +89,7 @@ app.get('/widget', (req, res) => {
         losePrimaryButton: '${losePrimaryButton}',
         loseSecondaryButton: '${loseSecondaryButton}',
         isOpen: '${isModalOpen}',
+        rewardId: '${rewardId}',
       }, 
       'reward-widget'
     );

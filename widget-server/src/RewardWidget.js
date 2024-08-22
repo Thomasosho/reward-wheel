@@ -1,101 +1,3 @@
-// import React, { useState, useEffect, useRef } from 'react';
-// import styled, { keyframes } from 'styled-components';
-// import NewWheel from './NewWheel';
-
-// const pulse = keyframes`
-//   0% {
-//     transform: scale(1);
-//   }
-//   50% {
-//     transform: scale(1.1);
-//   }
-//   100% {
-//     transform: scale(1);
-//   }
-// `;
-
-// const RewardWidgetContainer = styled.div`
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   height: 100vh;
-//   width: 100vw;
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   background-color: rgba(0, 0, 0, 0.8);
-//   flex-direction: column;
-// `;
-
-// const RewardTitle = styled.h1`
-//   color: #fff;
-//   font-size: 24px;
-//   margin-bottom: 20px;
-// `;
-
-// const RewardImage = styled.img`
-//   max-width: 15%;
-//   height: auto;
-//   margin-bottom: 20px;
-//   animation: ${pulse} 1s ease-in-out 7;
-// `;
-
-// const SpinButton = styled.button`
-//   width: 162px;
-//   height: 54px;
-//   padding: 15px 20px 15px 25px;
-//   gap: 8px;
-//   border-radius: 10px;
-//   opacity: 1;
-//   background-color: #F15822;
-//   color: #fff;
-//   border: none;
-//   margin-top: 20px;
-//   margin-bottom: 40px;
-//   cursor: pointer;
-// `;
-
-// const PoweredByImage = styled.img`
-//   width: 190px; 
-//   height: auto; 
-//   marginBottom: 40px;
-// `;
-
-// const RewardWidget = ({ settings }) => {
-//   const [rewards, setRewards] = useState(settings.rewardOptions || []);
-//   const wheelRef = useRef(null);
-
-//   const handleSelectReward = (selectedReward) => {
-//     console.log('Selected reward:', selectedReward);
-//   };
-
-//   useEffect(() => {
-//     setRewards(settings.rewardOptions || []);
-//   }, [settings]);
-
-//   const handleSpinClick = () => {
-//     if (wheelRef.current) {
-//       wheelRef.current.spinWheel();
-//     }
-//   };
-
-//   if (!settings || !settings.rewardOptions) {
-//     return <div style={{ color: 'red', fontWeight: 'bold' }}>Error: Invalid settings</div>;
-//   }
-
-//   return (
-//     <RewardWidgetContainer>
-//       {settings.nameOfReward && <RewardTitle>{settings.nameOfReward}</RewardTitle>}
-//       {settings.image && <RewardImage src={settings.image} alt={settings.nameOfReward} />}
-//       <NewWheel rewardList={rewards} ref={wheelRef} onSelectReward={handleSelectReward} pointer={settings.pointer} />
-//       <SpinButton onClick={handleSpinClick}>Spin Now</SpinButton>
-//       {settings.poweredBy && <PoweredByImage src={settings.poweredBy} alt={settings.nameOfReward} />}
-//     </RewardWidgetContainer>
-//   );
-// };
-
-// export default RewardWidget;
-
 import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import NewWheel from './NewWheel';
@@ -114,19 +16,6 @@ const pulse = keyframes`
     transform: scale(1);
   }
 `;
-
-// const ModalOverlay = styled.div`
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   width: 100vw;
-//   height: 100vh;
-//   background-color: rgba(0, 0, 0, 0.8);
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   z-index: 9999;
-// `;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -214,6 +103,8 @@ const RewardWidget = ({ settings }) => {
   const [claimData, setClaimData] = useState(null);
   const wheelRef = useRef(null);
 
+  console.log('settings', settings);
+
   // Use a single effect for setting rewards
   useEffect(() => {
     setRewards(settings.rewardOptions || []);
@@ -273,7 +164,7 @@ const RewardWidget = ({ settings }) => {
       wheelRef.current.spinWheel();
     }
     try {
-      const response = await fetch(`https://api.rewardclan.com/api/v1/widget/spin/${settings.rewardId}`, {
+      const response = await fetch(`https://api.rewardclan.com/api/v1/widget/spin?id=${settings.rewardId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -282,23 +173,19 @@ const RewardWidget = ({ settings }) => {
 
       if (response.ok) {
         const result = await response.json();
-        // wheelRef.current.spinTo(result.index);
         setClaimData(result);
         console.log('Spin result:', result);
       } else {
         const error = await response.text();
-        console.error(error);
-        // wheelRef.current.spinTo(result.index);
-        setClaimData(result);
+        console.error('Error:', error);
         setIsSpinning(false);
       }
     } catch (error) {
-      console.error(error.message);
-      // wheelRef.current.spinTo(result.index);
-      setClaimData(result);
+      console.error('Fetch error:', error.message);
       setIsSpinning(false);
     }
   };
+
 
   useEffect(() => {
     if (claimData) {
