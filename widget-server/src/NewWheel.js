@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, forwardRef, useState, useEffect } from 'react';
+import React, { useImperativeHandle, forwardRef, useState, useEffect, useRef } from 'react';
 
 const NewWheel = forwardRef(({ rewardList = [
   { description: "Prize 1" },
@@ -15,32 +15,83 @@ const NewWheel = forwardRef(({ rewardList = [
   selectedFont, }, ref) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
+  const spinningRef = useRef(null);
+  const currentRotationRef = useRef(0);
 
   const colors = [primaryColor, secondaryColor, '#f13a23'];
+
+  const numSegments = rewardList.length;
+  const segmentAngle = 360 / numSegments;
 
   console.info(pointer);
 
   useImperativeHandle(ref, () => ({
-    spinWheel: () => {
+    startSpinning: () => {
       setIsSpinning(true);
-      const numSegments = rewardList.length;
-      const segmentAngle = 360 / numSegments;
-      const randomSegment = Math.floor(Math.random() * numSegments);
-      const baseAngle = randomSegment * segmentAngle;
-      const randomOffset = Math.random() * segmentAngle;
-      const targetAngle = baseAngle + randomOffset;
-      const fullRotations = 5;
+      spinningRef.current = setInterval(() => {
+        setRotation(prev => {
+          const newRotation = (prev + 10) % 360;
+          currentRotationRef.current = newRotation;
+          return newRotation;
+        });
+      }, 50);
+    },
+    stopSpinning: (resultIndex) => {
+      if (spinningRef.current) {
+        clearInterval(spinningRef.current);
+      }
 
-      const totalRotation = fullRotations * 360 + targetAngle;
+      const currentRotation = currentRotationRef.current;
 
-      setRotation(prevRotation => prevRotation + totalRotation);
+      // Calculate the angle to the right side of the wheel
+      const rightSideAngle = 90;
+      
+      // Calculate the target angle for the winning segment
+      const targetAngle = (rightSideAngle - (resultIndex * segmentAngle + segmentAngle / 2) + 360) % 360;
+      
+      // Calculate the shortest distance to rotate
+      let additionalRotation = targetAngle - (currentRotation % 360);
+      if (additionalRotation < 0) additionalRotation += 360;
+      
+      // Add extra rotations for effect
+      const extraRotations = 2 * 360; // 2 full rotations
+      const totalRotation = currentRotation + additionalRotation + extraRotations;
 
-      // Set a timeout to stop spinning after the animation duration
+      console.log('Current rotation:', currentRotation);
+      console.log('Target angle:', targetAngle);
+      console.log('Additional rotation:', additionalRotation);
+      console.log('Total rotation:', totalRotation);
+
+      setRotation(totalRotation);
+
       setTimeout(() => {
         setIsSpinning(false);
-      }, 4000); // 4000ms matches the CSS transition duration
+        onSelectReward(rewardList[resultIndex]);
+      }, 5000); // Adjust timing as needed
     }
   }));
+
+  // useImperativeHandle(ref, () => ({
+  //   spinWheel: () => {
+  //     setIsSpinning(true);
+  //     const numSegments = rewardList.length;
+  //     const segmentAngle = 360 / numSegments;
+  //     const randomSegment = Math.floor(Math.random() * numSegments);
+  //     const baseAngle = randomSegment * segmentAngle;
+  //     const randomOffset = Math.random() * segmentAngle;
+  //     const targetAngle = baseAngle + randomOffset;
+  //     const fullRotations = 5;
+
+  //     const totalRotation = fullRotations * 360 + targetAngle;
+
+  //     setRotation(prevRotation => prevRotation + totalRotation);
+
+  //     // Set a timeout to stop spinning after the animation duration
+  //     setTimeout(() => {
+  //       setIsSpinning(false);
+  //     }, 4000); // 4000ms matches the CSS transition duration
+  //   }
+  // }));
 
   useEffect(() => {
     if (rotation === 0 || isSpinning) return;
@@ -161,7 +212,7 @@ const NewWheel = forwardRef(({ rewardList = [
         style={{
           transformOrigin: 'center',
           transform: `rotate(${rotation}deg)`,
-          transition: 'transform 4s cubic-bezier(0.33, 1, 0.68, 1)'
+          transition: isSpinning ? 'none' : 'transform 5s cubic-bezier(0.25, 0.1, 0.25, 1)'
         }}
       >
         {/* Reward Wheel Itself */}
@@ -237,7 +288,8 @@ const NewWheel = forwardRef(({ rewardList = [
         y="230"
         width="100"
         preserveAspectRatio="xMidYMid meet"
-        transform="rotate(55, 300, 300)"
+        // transform="rotate(55, 300, 300)"
+        transform="rotate(-35, 300, 300)"
       />
     </svg>
   );

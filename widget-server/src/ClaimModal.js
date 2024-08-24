@@ -107,7 +107,7 @@ const ClaimModal = ({ onClose, claimData }) => {
   const handleClaimReward = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`https://api.rewardclan.com/api/v1/customer/add-winners/${claimData?.RewardId}`, {
+      const response = await fetch(`https://api.rewardclan.com/api/v1/widget/add-winners/${claimData?.RewardId}?sessionId=${claimData?.sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,8 +116,7 @@ const ClaimModal = ({ onClose, claimData }) => {
           index: claimData?.index,
           rewardOptionDesc: claimData?.OptionDescription,
           fullName: formState.fullName,
-          email: formState.email,
-          sessionId: claimData?.sessionId
+          email: formState.email
         })
       });
 

@@ -158,11 +158,66 @@ const RewardWidget = ({ settings }) => {
     "sessionId": "df3fca63-f4d8-417d-819e-cdf82aa3cb12"
   }
 
-  const handleSpinClick = async () => {
-    setIsSpinning(true);
-    if (wheelRef.current) {
-      wheelRef.current.spinWheel();
+  // const handleSpinClick = async () => {
+  //   setIsSpinning(true);
+  //   if (wheelRef.current) {
+  //     wheelRef.current.spinWheel();
+  //   }
+  //   try {
+  //     const response = await fetch(`https://api.rewardclan.com/api/v1/widget/spin?id=${settings.rewardId}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       setClaimData(result);
+  //       console.log('Spin result:', result);
+  //     } else {
+  //       const error = await response.text();
+  //       console.error('Error:', error);
+  //       setIsSpinning(false);
+  //     }
+  //   } catch (error) {
+  //     console.error('Fetch error:', error.message);
+  //     setIsSpinning(false);
+  //   } finally {
+  //     setIsSpinning(false);
+  //   }
+  // };
+
+  const handleSpinUPDATE= async () => {
+    try {
+      const response = await fetch(`https://api.rewardclan.com/api/v1/widget/update-spinner?rewardId?id=${settings.rewardId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setRewards(result);
+      } else {
+        const error = await response.text();
+        console.error('Error:', error);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error.message);
     }
+  };
+
+  const handleSpinClick = async () => {
+    if (isSpinning) return;
+    setIsSpinning(true);
+
+    // Start spinning immediately
+    if (wheelRef.current) {
+      wheelRef.current.startSpinning();
+    }
+
     try {
       const response = await fetch(`https://api.rewardclan.com/api/v1/widget/spin?id=${settings.rewardId}`, {
         method: 'GET',
@@ -175,17 +230,31 @@ const RewardWidget = ({ settings }) => {
         const result = await response.json();
         setClaimData(result);
         console.log('Spin result:', result);
+        await handleSpinUPDATE();
+        if (wheelRef.current) {
+          wheelRef.current.stopSpinning(result.index);
+        }
       } else {
         const error = await response.text();
         console.error('Error:', error);
         setIsSpinning(false);
+        if (wheelRef.current) {
+          wheelRef.current.stopSpinning();
+        }
       }
     } catch (error) {
       console.error('Fetch error:', error.message);
       setIsSpinning(false);
+      if (wheelRef.current) {
+        wheelRef.current.stopSpinning();
+      }
+    } finally {
+      // if (wheelRef.current) {
+      //   wheelRef.current.stopSpinning();
+      // }
+      setIsSpinning(false);
     }
   };
-
 
   useEffect(() => {
     if (claimData) {
